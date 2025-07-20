@@ -2,6 +2,12 @@
 
 Telegram бот для создания персональных тестов с мультиязычной поддержкой.
 
+## 🚀 Быстрый деплой
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/wvt9ZJ?referralCode=)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/YOUR_USERNAME/genyourbot)
+
 ## Возможности
 
 - 🌍 Поддержка 3 языков: русский, английский, фарси
