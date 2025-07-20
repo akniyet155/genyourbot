@@ -1,0 +1,15 @@
+[Unit]
+Description=GenYourBot Telegram Bot
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/genyourbot
+ExecStart=/home/ubuntu/genyourbot/.venv/bin/python predposlednii.py
+Restart=always
+RestartSec=10
+Environment=PATH=/home/ubuntu/genyourbot/.venv/bin
+
+[Install]
+WantedBy=multi-user.target

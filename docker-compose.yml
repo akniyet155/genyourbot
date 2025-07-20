@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  genyourbot:
+    build: .
+    container_name: genyourbot
+    restart: unless-stopped
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - CRYPTOBOT_API_TOKEN=${CRYPTOBOT_API_TOKEN}
+    volumes:
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
+    networks:
+      - bot_network
+
+networks:
+  bot_network:
+    driver: bridge
