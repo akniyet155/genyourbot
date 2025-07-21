@@ -35,16 +35,24 @@ print(f"DEBUG: FIREBASE_KEY length: {len(firebase_key) if firebase_key else 0}")
 
 if firebase_key:
     try:
-        # Исправляем экранирование символов в JSON
-        firebase_key = firebase_key.replace('\\n', '\n').replace('\\"', '"')
-        firebase_data = json.loads(firebase_key)
+        # Railway сохраняет JSON как одну строку с экранированными символами
+        # Заменяем \\n на \n и \\\" на \" для корректного парсинга
+        firebase_key_fixed = firebase_key.replace('\\\\n', '\\n').replace('\\\\\"', '\\\"')
+        print(f"DEBUG: После первого исправления: {firebase_key_fixed[:100]}")
+        
+        # Затем заменяем \n на реальные переносы строк и \" на "
+        firebase_key_final = firebase_key_fixed.replace('\\n', '\n').replace('\\"', '"')
+        print(f"DEBUG: После финального исправления: {firebase_key_final[:100]}")
+        
+        firebase_data = json.loads(firebase_key_final)
         
         # Используем переменную окружения
         firebase_admin.initialize_app(credentials.Certificate(firebase_data))
         print("✅ Firebase инициализован через переменную окружения")
     except json.JSONDecodeError as e:
         print(f"❌ Ошибка парсинга JSON: {e}")
-        print(f"❌ Первые 100 символов FIREBASE_KEY: {firebase_key[:100] if firebase_key else 'None'}")
+        print(f"❌ Исходная строка (первые 200 символов): {firebase_key[:200] if firebase_key else 'None'}")
+        print(f"❌ Позиция ошибки: {e.pos if hasattr(e, 'pos') else 'неизвестно'}")
         exit(1)
     except Exception as e:
         print(f"❌ Ошибка инициализации Firebase: {e}")
