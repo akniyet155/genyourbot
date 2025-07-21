@@ -35,16 +35,14 @@ print(f"DEBUG: FIREBASE_KEY length: {len(firebase_key) if firebase_key else 0}")
 
 if firebase_key:
     try:
-        # Railway сохраняет JSON как одну строку с экранированными символами
-        # Заменяем \\n на \n и \\\" на \" для корректного парсинга
-        firebase_key_fixed = firebase_key.replace('\\\\n', '\\n').replace('\\\\\"', '\\\"')
-        print(f"DEBUG: После первого исправления: {firebase_key_fixed[:100]}")
+        # Используем codecs для правильной обработки escape-последовательностей
+        import codecs
         
-        # Затем заменяем \n на реальные переносы строк и \" на "
-        firebase_key_final = firebase_key_fixed.replace('\\n', '\n').replace('\\"', '"')
-        print(f"DEBUG: После финального исправления: {firebase_key_final[:100]}")
+        # Декодируем escape-последовательности
+        firebase_key_decoded = codecs.decode(firebase_key, 'unicode_escape')
+        print(f"DEBUG: После декодирования: {firebase_key_decoded[:100]}")
         
-        firebase_data = json.loads(firebase_key_final)
+        firebase_data = json.loads(firebase_key_decoded)
         
         # Используем переменную окружения
         firebase_admin.initialize_app(credentials.Certificate(firebase_data))
@@ -53,7 +51,15 @@ if firebase_key:
         print(f"❌ Ошибка парсинга JSON: {e}")
         print(f"❌ Исходная строка (первые 200 символов): {firebase_key[:200] if firebase_key else 'None'}")
         print(f"❌ Позиция ошибки: {e.pos if hasattr(e, 'pos') else 'неизвестно'}")
-        exit(1)
+        # Попробуем альтернативный способ - через ast.literal_eval
+        try:
+            import ast
+            firebase_data = ast.literal_eval(firebase_key)
+            firebase_admin.initialize_app(credentials.Certificate(firebase_data))
+            print("✅ Firebase инициализован через ast.literal_eval")
+        except Exception as e2:
+            print(f"❌ Альтернативный способ тоже не сработал: {e2}")
+            exit(1)
     except Exception as e:
         print(f"❌ Ошибка инициализации Firebase: {e}")
         exit(1)
