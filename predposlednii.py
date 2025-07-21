@@ -34,9 +34,13 @@ if firebase_key:
     # Используем переменную окружения
     firebase_admin.initialize_app(credentials.Certificate(json.loads(firebase_key)))
 else:
-    # Используем файл
-    with open("serviceAccountKey.json", encoding="utf-8") as f:
-        firebase_admin.initialize_app(credentials.Certificate(json.load(f)))
+    # Используем файл (fallback)
+    try:
+        with open("serviceAccountKey.json", encoding="utf-8") as f:
+            firebase_admin.initialize_app(credentials.Certificate(json.load(f)))
+    except FileNotFoundError:
+        print("❌ ОШИБКА: Не найден файл serviceAccountKey.json и переменная FIREBASE_KEY")
+        exit(1)
 db = firestore.client()
 logging.basicConfig(level=logging.INFO)
 
