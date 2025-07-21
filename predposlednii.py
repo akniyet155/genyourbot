@@ -24,12 +24,19 @@ from aiogram.client.default import DefaultBotProperties
 
 # ── ENV & Firebase ────────────────────────────────────────────────────────
 load_dotenv()
-BOT_TOKEN           = os.getenv("BOT_TOKEN")
-CRYPTOBOT_API_TOKEN = os.getenv("CRYPTOBOT_API_TOKEN")
+BOT_TOKEN           = os.getenv("BOT_TOKEN") or "7985077405:AAGjSNrBC88HXn1zKQ9t29BNv5Ozw2FD8XQ"
+CRYPTOBOT_API_TOKEN = os.getenv("CRYPTOBOT_API_TOKEN") or "433506:AAaGKgWBRpixHRXf3wKJqXecLVwDmPgMMGn"
 assert BOT_TOKEN and CRYPTOBOT_API_TOKEN, "Токены не заданы!"
 
-with open("serviceAccountKey.json", encoding="utf-8") as f:
-    firebase_admin.initialize_app(credentials.Certificate(json.load(f)))
+# Firebase инициализация
+firebase_key = os.getenv("FIREBASE_KEY")
+if firebase_key:
+    # Используем переменную окружения
+    firebase_admin.initialize_app(credentials.Certificate(json.loads(firebase_key)))
+else:
+    # Используем файл
+    with open("serviceAccountKey.json", encoding="utf-8") as f:
+        firebase_admin.initialize_app(credentials.Certificate(json.load(f)))
 db = firestore.client()
 logging.basicConfig(level=logging.INFO)
 
