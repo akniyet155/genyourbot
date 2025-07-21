@@ -30,16 +30,34 @@ assert BOT_TOKEN and CRYPTOBOT_API_TOKEN, "Токены не заданы!"
 
 # Firebase инициализация
 firebase_key = os.getenv("FIREBASE_KEY")
+print(f"DEBUG: FIREBASE_KEY exists: {firebase_key is not None}")
+print(f"DEBUG: FIREBASE_KEY length: {len(firebase_key) if firebase_key else 0}")
+
 if firebase_key:
-    # Используем переменную окружения
-    firebase_admin.initialize_app(credentials.Certificate(json.loads(firebase_key)))
+    try:
+        # Исправляем экранирование символов в JSON
+        firebase_key = firebase_key.replace('\\n', '\n').replace('\\"', '"')
+        firebase_data = json.loads(firebase_key)
+        
+        # Используем переменную окружения
+        firebase_admin.initialize_app(credentials.Certificate(firebase_data))
+        print("✅ Firebase инициализован через переменную окружения")
+    except json.JSONDecodeError as e:
+        print(f"❌ Ошибка парсинга JSON: {e}")
+        print(f"❌ Первые 100 символов FIREBASE_KEY: {firebase_key[:100] if firebase_key else 'None'}")
+        exit(1)
+    except Exception as e:
+        print(f"❌ Ошибка инициализации Firebase: {e}")
+        exit(1)
 else:
     # Используем файл (fallback)
     try:
         with open("serviceAccountKey.json", encoding="utf-8") as f:
             firebase_admin.initialize_app(credentials.Certificate(json.load(f)))
+        print("✅ Firebase инициализован через файл")
     except FileNotFoundError:
         print("❌ ОШИБКА: Не найден файл serviceAccountKey.json и переменная FIREBASE_KEY")
+        print("❌ Добавьте переменную FIREBASE_KEY в Railway Variables!")
         exit(1)
 db = firestore.client()
 logging.basicConfig(level=logging.INFO)
